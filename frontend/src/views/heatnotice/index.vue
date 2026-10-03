@@ -85,7 +85,16 @@ const meta = moduleMeta('heatnotice')
 const columns = ["通知编号", "影响片区", "停暖原因", "计划开始", "计划恢复", "通知方式", "发布人", "通知状态"]
 const actions = ["提交拟稿", "发布通知", "撤销通知"]
 const statuses = ["待拟稿", "待发布", "已发布", "已撤销"]
-const stats = [{"label": "待发布通知", "value": 0}, {"label": "已发布通知", "value": 0}, {"label": "影响片区数", "value": 0}]
+// 待办理 = 待拟稿 + 待发布；换热站移交后会往这里挂一张待发布通知。
+const pendingStatuses = ["待拟稿", "待发布"]
+const stats = computed(() => [
+  { label: "待办理通知", value: rows.value.filter((row) => pendingStatuses.includes(String(row.status))).length },
+  { label: "已发布通知", value: rows.value.filter((row) => String(row.status) === "已发布").length },
+  {
+    label: "影响片区数",
+    value: new Set(rows.value.map((row) => String(row["影响片区"] ?? "")).filter(Boolean)).size,
+  },
+])
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)

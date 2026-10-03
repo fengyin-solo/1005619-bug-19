@@ -12,6 +12,8 @@ export const MODULES: ModuleMeta[] = [
     actions: ["提交投运", "登记停运", "办理移交"],
     actionTargets: {"提交投运": "运行中", "登记停运": "已停运", "办理移交": "已移交"},
     metrics: ["运行中站点", "待投运站点", "累计供热面积"],
+    identityField: "站名",
+    statusField: "站点状态",
   },
   {
     key: "primarynet",
@@ -177,6 +179,8 @@ export const MODULES: ModuleMeta[] = [
     actions: ["提交拟稿", "发布通知", "撤销通知"],
     actionTargets: {"提交拟稿": "待发布", "发布通知": "已发布", "撤销通知": "已撤销"},
     metrics: ["待发布通知", "已发布通知", "影响片区数"],
+    identityField: "通知编号",
+    statusField: "通知状态",
   },
   {
     key: "heatbilling",
