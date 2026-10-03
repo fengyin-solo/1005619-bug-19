@@ -12,6 +12,7 @@ export const MODULES: ModuleMeta[] = [
     actions: ["提交投运", "登记停运", "办理移交"],
     actionTargets: {"提交投运": "运行中", "登记停运": "已停运", "办理移交": "已移交"},
     metrics: ["运行中站点", "待投运站点", "累计供热面积"],
+    exitStatuses: ["已移交"],
   },
   {
     key: "primarynet",

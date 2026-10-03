@@ -46,6 +46,7 @@
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
+            <button class="link" type="button" @click="openDetail(row)">详情</button>
             <button
               v-for="action in actions"
               :key="action"
@@ -65,8 +66,28 @@
 
     <footer class="page-foot">
       <span>共 {{ total }} 条换热站台账记录</span>
+      <span v-if="infoMessage" class="info-text">{{ infoMessage }}</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
     </footer>
+
+    <div v-if="detailRow" class="drawer-mask" @click.self="closeDetail">
+      <aside class="drawer" role="dialog" aria-label="换热站详情">
+        <header class="drawer-head">
+          <h3>换热站详情</h3>
+          <button class="btn ghost" type="button" @click="closeDetail">关闭</button>
+        </header>
+        <dl class="drawer-body">
+          <div v-for="column in columns" :key="column" class="drawer-item">
+            <dt>{{ column }}</dt>
+            <dd>{{ detailRow[column] ?? '—' }}</dd>
+          </div>
+          <div class="drawer-item">
+            <dt>当前状态</dt>
+            <dd>{{ detailRow.status }}</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
   </section>
 </template>
 
@@ -75,6 +96,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import {
   downloadEntries,
+  getEntry,
   listEntries,
   moduleMeta,
   runAction as applyAction,
@@ -90,6 +112,8 @@ const stats = [{"label": "运行中站点", "value": 0}, {"label": "待投运站
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
+const infoMessage = ref('')
+const detailRow = ref<EntryRow | null>(null)
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
 const statusSummary = computed(() =>
@@ -112,12 +136,35 @@ function openCreate() {
   errorMessage.value = '换热站登记入口尚未接入审批流'
 }
 
+function openDetail(row: EntryRow) {
+  // 抽屉和列表取同一份数据：打开时按编号重新读，不沿用行里的旧快照
+  const fresh = getEntry(meta.key, Number(row.id))
+  if (!fresh) {
+    errorMessage.value = '该换热站记录已不在台账中'
+    return
+  }
+  errorMessage.value = ''
+  infoMessage.value = ''
+  detailRow.value = fresh
+}
+
+function closeDetail() {
+  detailRow.value = null
+}
+
 function runAction(action: string, row: EntryRow) {
   errorMessage.value = ''
+  infoMessage.value = ''
   const result = applyAction(meta.key, Number(row.id), action)
   if (!result.ok) {
     errorMessage.value = result.message
     return
+  }
+  infoMessage.value = result.message
+  if (action === '办理移交') {
+    closeDetail()
+  } else if (detailRow.value && Number(detailRow.value.id) === Number(row.id)) {
+    detailRow.value = getEntry(meta.key, Number(row.id))
   }
   reload()
 }

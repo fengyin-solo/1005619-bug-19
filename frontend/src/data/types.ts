@@ -18,6 +18,8 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  /** 办结后退出当前清单的状态（如换热站「已移交」）：数据保留，列表不再展示 */
+  exitStatuses?: string[]
 }
 
 export type PageResult = {
